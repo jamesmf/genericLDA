@@ -40,23 +40,43 @@ import getopt
 
 
 
+import cPickle
+import helper_funcs
+import onlineldavb
+import sys
+from os import listdir
+from os.path import isdir
+from os import mkdir
+import operator
+import numpy as np
+import getopt
+
+
+
+
 
 def handleArgs(argv):
     try:
-       opts, args = getopt.getopt(argv,"k:d:ab",["topics=","folder=","alpha","beta"])
+       opts, args = getopt.getopt(argv,"k:d:abs",["topics=","folder=","alpha","beta","save"])
     except getopt.GetoptError:
        print 'test.py -k <# of Topics> -d <dictionary path>'
        sys.exit(2)
        
     for opt, arg in opts:
 
-       if opt in ("-i", "--ifile"):
-          inp = arg
-       elif opt in ("-o", "--ofile"):
-          ofile = arg
-    print 'Input folder is ', inp
-    print 'Output file is ', ofile 
-    return inp, ofile
+       if opt in ("-k", "--topics"):
+          k = arg
+       elif opt in ("-d", "--folder"):
+          folder = arg
+      elif opt in ("-a", "--alpha"):
+          alpha = arg
+      elif opt in ("-b", "--beta"):
+          beta = arg
+      elif opt in ("-s", "--save"):
+          save = arg
+    print 'Number of topics entered: ', inp
+    print 'Dictionary is located at: ', ofile 
+    return k, folder, alpha, beta, save
 
 
 
@@ -65,6 +85,7 @@ def main(argv):
     
     doc_list    =   []
     
+    argList     = handleArgs(argv)
     #list the docs in pickledDocs folder
     p   =   "../data/pickledDocs/"
     l   =   listdir(p)
@@ -95,30 +116,24 @@ def main(argv):
     
     
     #initialize an instance of the OnlineLDA algorithm
-    #parameters - dictionary, num topics, learning rate, eta, tau, kappa
+    #parameters - dictionary, num topics, learning rate, beta, tau, kappa
     #if the path to an OnlineLDA pickle is passed, it re-opens that pickle
-    if len(sys.argv) > 2:
-        K           =   int(sys.argv[1])
-        vocab       =   vocab = str.split(file(sys.argv[2]).read())
-        if len(sys.argv) > 4:
-            alpha       =   float(sys.argv[3])                      #hyperparameter
-            eta         =   float(sys.argv[4])                      #hyperparameter
-        else:
-            alpha   =   0.1
-            eta     =   1.
-        if len(sys.argv) == 4:
-            folder  =   sys.argv[3]
-        saveModel   =   False
-        lda         =   onlineldavb.OnlineLDA(vocab,K,D,alpha,eta,1024,0.)
-        print "created LDA with parameters:\nnumwords: "+str(len(vocab))+"\n#topics: "+str(K)+"\nalpha: "+str(alpha)+"\neta: "+str(eta)
-    
-    elif len(sys.argv) > 1:
-        with open(sys.argv[1],'rb') as f:
-            lda         =   cPickle.load(f)
+
+    K           =   int(argList[0])
+    vocab       =   vocab = str.split(file(argList[1]).read())
+    if not (argList[2] is None):
+        alpha   = argList[2]
     else:
-        lda         =   onlineldavb.OnlineLDA(vocab,K,D,1./K,1./K,1024,0.)
-        
-    
+        alpha   =   0.1
+    if not (argList[3] is None):
+        beta    = argList[3]
+    else:
+        beta     =   1.
+
+    saveModel   =   False
+    lda         =   onlineldavb.OnlineLDA(vocab,K,D,alpha,beta,1024,0.)
+    print "created LDA with parameters:\nnumwords: "+str(len(vocab))+"\n#topics: "+str(K)+"\nalpha: "+str(alpha)+"\nbeta: "+str(beta)
+           
     paramTitle  =   hyper_param+str(len(vocab)/1000)+"kwords_"+str(K)+"topics"
     
     folder  = "../data/out/models/"+paramTitle
