@@ -39,22 +39,6 @@ import getopt
 
 
 
-
-import cPickle
-import helper_funcs
-import onlineldavb
-import sys
-from os import listdir
-from os.path import isdir
-from os import mkdir
-import operator
-import numpy as np
-import getopt
-
-
-
-
-
 def handleArgs(argv):
     try:
        opts, args = getopt.getopt(argv,"k:d:abs",["topics=","folder=","alpha","beta","save"])
@@ -68,14 +52,14 @@ def handleArgs(argv):
           k = arg
        elif opt in ("-d", "--folder"):
           folder = arg
-      elif opt in ("-a", "--alpha"):
+       elif opt in ("-a", "--alpha"):
           alpha = arg
-      elif opt in ("-b", "--beta"):
+       elif opt in ("-b", "--beta"):
           beta = arg
-      elif opt in ("-s", "--save"):
+       elif opt in ("-s", "--save"):
           save = arg
-    print 'Number of topics entered: ', inp
-    print 'Dictionary is located at: ', ofile 
+    print 'Number of topics entered: ', k
+    print 'Dictionary is located at: ', folder 
     return k, folder, alpha, beta, save
 
 
